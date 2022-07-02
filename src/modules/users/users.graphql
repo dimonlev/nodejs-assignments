@@ -1,0 +1,41 @@
+type User {
+  firstName: String!
+  lastName: String!
+  password: String!
+  email: String!
+  id: ID!
+  favouriteArtistIds: [String]
+  favouriteSongsIds: [String]
+  favouriteBandsIds: [String]
+  favouriteGenresIds: [String]
+}
+
+input UserRequest {
+  password: String!
+  email: String!
+}
+
+type Jwt {
+  jwt: String
+}
+
+input CreateUserInput {
+  firstName: String!
+  lastName: String!
+  password: String!
+  email: String!
+  favouriteArtistIds: [String]
+  favouriteSongsIds: [String]
+  favouriteBandsIds: [String]
+  favouriteGenresIds: [String]
+}
+
+type Query {
+  users: [User]!
+  user(id: ID!): User
+  jwt(user: UserRequest): Jwt
+}
+
+type Mutation {
+  register(createUserInput: CreateUserInput!): User!
+}
