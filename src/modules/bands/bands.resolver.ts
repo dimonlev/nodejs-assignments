@@ -18,8 +18,11 @@ export class BandsResolver {
   }
 
   @Query('bands')
-  findAll() {
-    return this.bandsService.findAll();
+  findAll(@Args() args: { limit: number; offset: number }) {
+    return this.bandsService.findAll(
+      args.limit.toString(),
+      args.offset.toString(),
+    );
   }
 
   @Query('band')
@@ -37,7 +40,8 @@ export class BandsResolver {
   }
 
   @Mutation('removeBand')
-  remove(@Args('id') id: string) {
-    return this.bandsService.remove(id);
+  remove(@Args('id') id: string, @Context() context) {
+    const token = context.req.headers.authorization;
+    return this.bandsService.remove(id, token);
   }
 }

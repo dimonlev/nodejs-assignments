@@ -5,7 +5,7 @@ export class UpdateBandInput extends PartialType(CreateBandInput) {
   id: string;
   name: string;
   origin: string;
-  // membersId: Member[];
+  membersId: string[];
   website: string;
   genresIds: string[];
 }

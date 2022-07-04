@@ -1,6 +1,4 @@
-import { Band } from 'src/modules/bands/entities/band.entity';
-
-export type ArtistResponse = {
+export interface ArtistResponse {
   _id: string;
   firstName: string;
   secondName: string;
@@ -8,6 +6,6 @@ export type ArtistResponse = {
   birthDate?: string;
   birthPlace?: string;
   country: string;
-  bands?: Band[];
+  bandsIds?: string[];
   instruments?: string;
-};
+}

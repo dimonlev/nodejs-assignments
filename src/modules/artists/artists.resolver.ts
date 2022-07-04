@@ -1,4 +1,11 @@
-import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Context,
+  Info,
+} from '@nestjs/graphql';
 import { ArtistsService } from './artists.service';
 import { CreateArtistInput } from './dto/create-artist.input';
 import { UpdateArtistInput } from './dto/update-artist.input';
@@ -18,8 +25,11 @@ export class ArtistsResolver {
   }
 
   @Query('artists')
-  findAll() {
-    return this.artistsService.findAll();
+  findAll(@Args() args: { limit: number; offset: number }) {
+    return this.artistsService.findAll(
+      args.limit.toString(),
+      args.offset.toString(),
+    );
   }
 
   @Query('artist')

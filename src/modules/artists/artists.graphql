@@ -17,24 +17,24 @@ input CreateArtistInput {
   birthDate: String
   birthPlace: String
   country: String!
-  bands: [CreateBandInput]
+  bandsIds: [String]
   instruments: String
 }
 
 input UpdateArtistInput {
   id: ID!
-  firstName: String!
-  secondName: String!
+  firstName: String
+  secondName: String
   middleName: String
   birthDate: String
   birthPlace: String
-  country: String!
-  bands: [UpdateBandInput]
+  country: String
+  bandsIds: [String]
   instruments: String
 }
 
 type Query {
-  artists: [Artist]!
+  artists(offset: Int, limit: Int): [Artist]!
   artist(id: ID!): Artist
 }
 

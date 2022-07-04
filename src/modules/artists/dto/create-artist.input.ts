@@ -5,6 +5,6 @@ export class CreateArtistInput {
   birthDate?: string;
   birthPlace?: string;
   country: string;
-  // bands: [Band]
+  bandsIds?: string[];
   instruments?: string[];
 }

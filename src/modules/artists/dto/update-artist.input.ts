@@ -7,36 +7,4 @@ export class UpdateArtistInput extends PartialType(CreateArtistInput) {
   @IsString()
   @IsOptional()
   id: string;
-
-  @IsOptional()
-  @IsString()
-  firstName: string;
-
-  @IsOptional()
-  @IsString()
-  secondName: string;
-
-  @IsOptional()
-  @IsString()
-  middleName: string;
-
-  @IsOptional()
-  @IsDate()
-  birthDate: string;
-
-  @IsOptional()
-  @IsString()
-  birthPlace: string;
-
-  @IsOptional()
-  @IsString()
-  country: string;
-
-  @IsOptional()
-  @IsArray()
-  bands: Band[];
-
-  @IsOptional()
-  @IsArray()
-  instruments: string[];
 }

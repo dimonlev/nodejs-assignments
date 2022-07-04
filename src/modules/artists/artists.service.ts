@@ -12,9 +12,9 @@ import { ArtistsResponse } from './types/artistsResponse.type';
 @Injectable()
 export class ArtistsService {
   constructor(
-    private configService: ConfigService,
+    private readonly configService: ConfigService,
     private readonly httpService: HttpService,
-    private bandsService: BandsService,
+    private readonly bandsService: BandsService,
   ) {}
 
   async create(artist: CreateArtistInput, token: string): Promise<Artist> {
@@ -24,34 +24,43 @@ export class ArtistsService {
         artist,
         { headers: { Authorization: `${token}` } },
       );
-      return { ...data, id: data._id };
+      const bands = await this.getBands(data.bandsIds);
+      return { ...data, id: data._id, bands };
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 
-  async findAll(): Promise<Artist[]> {
+  async findAll(limit: string, offset: string): Promise<Artist[]> {
     try {
       const { data } = await this.httpService.axiosRef.get<ArtistsResponse>(
-        `${this.configService.get<string>('ARTISTS_URL')}`,
+        `${this.configService.get<string>(
+          'ARTISTS_URL',
+        )}?limit=${limit}&offset=${offset}`,
       );
-      console.log(data);
-      return data.items.map((artist) => {
-        return { ...artist, id: artist._id };
-      });
+      return await Promise.all(
+        data.items.map(async (artist) => {
+          const bands = await this.getBands(artist.bandsIds);
+          return { ...artist, id: artist._id, bands: bands };
+        }),
+      );
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<Artist> {
     try {
       const { data } = await this.httpService.axiosRef.get<ArtistResponse>(
         `${this.configService.get<string>('ARTISTS_URL')}/${id}`,
       );
+      if (data.bandsIds) {
+        const bands = await this.getBands(data.bandsIds);
+        return { ...data, id: data._id, bands: bands };
+      }
       return { ...data, id: data._id };
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 
@@ -66,15 +75,10 @@ export class ArtistsService {
         updateArtistInput,
         { headers: { Authorization: `${token}` } },
       );
-      const bands = await Promise.all(
-        updateArtistInput.bands.map((band) =>
-          this.bandsService.update(band.id, band, token),
-        ),
-      );
-      console.log({ ...data, id: data._id, bands: bands });
-      return { ...data, id: data._id, bands: bands };
+      const bands = await this.getBands(data.bandsIds);
+      return { ...data, id: data._id, bands };
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 
@@ -86,7 +90,11 @@ export class ArtistsService {
       );
       return true;
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
+  }
+
+  private async getBands(bands: string[]) {
+    return await Promise.all(bands.map((id) => this.bandsService.findOne(id)));
   }
 }

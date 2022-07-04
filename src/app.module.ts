@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { ArtistsModule } from './modules/artists/artists.module';
 import { BandsModule } from './modules/bands/bands.module';
+import { GenresModule } from './modules/genres/genres.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { BandsModule } from './modules/bands/bands.module';
     HttpModule,
     ArtistsModule,
     BandsModule,
+    GenresModule,
   ],
 })
 export class AppModule {}
