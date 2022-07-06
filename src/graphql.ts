@@ -15,7 +15,7 @@ export interface CreateArtistInput {
     birthPlace?: Nullable<string>;
     country: string;
     bandsIds?: Nullable<Nullable<string>[]>;
-    instruments?: Nullable<string>;
+    instruments?: Nullable<Nullable<string>[]>;
 }
 
 export interface UpdateArtistInput {
@@ -27,12 +27,13 @@ export interface UpdateArtistInput {
     birthPlace?: Nullable<string>;
     country?: Nullable<string>;
     bandsIds?: Nullable<Nullable<string>[]>;
-    instruments?: Nullable<string>;
+    instruments?: Nullable<Nullable<string>[]>;
 }
 
 export interface CreateBandInput {
     name?: Nullable<string>;
     origin?: Nullable<string>;
+    members?: Nullable<Nullable<CreateMemberInput>[]>;
     website?: Nullable<string>;
     genresIds?: Nullable<Nullable<string>[]>;
 }
@@ -41,8 +42,19 @@ export interface UpdateBandInput {
     id: string;
     name?: Nullable<string>;
     origin?: Nullable<string>;
+    members?: Nullable<Nullable<UpdateMemberInput>[]>;
     website?: Nullable<string>;
     genresIds?: Nullable<Nullable<string>[]>;
+}
+
+export interface CreateMemberInput {
+    id: string;
+    years?: Nullable<Nullable<string>[]>;
+}
+
+export interface UpdateMemberInput {
+    id: string;
+    years?: Nullable<Nullable<string>[]>;
 }
 
 export interface CreateGenreInput {
@@ -85,7 +97,7 @@ export interface Artist {
     birthPlace?: Nullable<string>;
     country: string;
     bands?: Nullable<Nullable<Band>[]>;
-    instruments?: Nullable<string>;
+    instruments?: Nullable<Nullable<string>[]>;
 }
 
 export interface IQuery {
@@ -117,8 +129,18 @@ export interface Band {
     id: string;
     name?: Nullable<string>;
     origin?: Nullable<string>;
+    members?: Nullable<Nullable<Member>[]>;
     website?: Nullable<string>;
     genres?: Nullable<Nullable<Genre>[]>;
+}
+
+export interface Member {
+    id: string;
+    firstName?: Nullable<string>;
+    secondName?: Nullable<string>;
+    middleName?: Nullable<string>;
+    instrument?: Nullable<string>;
+    years?: Nullable<Nullable<string>[]>;
 }
 
 export interface Genre {

@@ -1,8 +1,10 @@
-type BandResponse = {
+import { Member } from '../entities/member.entity';
+
+export interface BandResponse {
   _id: string;
   name: string;
   origin: string;
-  // membersId: Member[];
+  members: Member[];
   website: string;
   genresIds: string[];
-};
+}

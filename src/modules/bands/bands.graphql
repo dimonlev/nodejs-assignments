@@ -2,26 +2,45 @@ type Band {
   id: ID!
   name: String
   origin: String
-  # members: [Member]
+  members: [Member]
   website: String
   genres: [Genre]
+}
+
+type Member {
+  id: ID!
+  firstName: String
+  secondName: String
+  middleName: String
+  instrument: String
+  years: [String]
 }
 
 input CreateBandInput {
   name: String
   origin: String
-  # members: [Member]
+  members: [CreateMemberInput]
   website: String
-  genresIds: [String]
+  genresIds: [ID]
 }
 
 input UpdateBandInput {
   id: ID!
   name: String
   origin: String
-  # members: [Member]
+  members: [UpdateMemberInput]
   website: String
-  genresIds: [String]
+  genresIds: [ID]
+}
+
+input CreateMemberInput {
+  id: ID!
+  years: [String]
+}
+
+input UpdateMemberInput {
+  id: ID!
+  years: [String]
 }
 
 type Query {

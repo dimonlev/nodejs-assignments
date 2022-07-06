@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BandsService } from '../bands/bands.service';
 import { Band } from '../bands/entities/band.entity';
@@ -14,6 +14,7 @@ export class ArtistsService {
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    @Inject(forwardRef(() => BandsService))
     private readonly bandsService: BandsService,
   ) {}
 
@@ -75,6 +76,7 @@ export class ArtistsService {
         updateArtistInput,
         { headers: { Authorization: `${token}` } },
       );
+      console.log(data);
       const bands = await this.getBands(data.bandsIds);
       return { ...data, id: data._id, bands };
     } catch (err) {

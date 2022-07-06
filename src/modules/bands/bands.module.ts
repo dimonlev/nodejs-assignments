@@ -3,12 +3,14 @@ import { BandsService } from './bands.service';
 import { BandsResolver } from './bands.resolver';
 import { HttpModule } from '@nestjs/axios';
 import { Axios } from 'axios';
-import { GenresService } from '../genres/genres.service';
 import { GenresModule } from '../genres/genres.module';
+import { ArtistsModule } from '../artists/artists.module';
+import { forwardRef } from '@nestjs/common';
 
 @Module({
   imports: [
     GenresModule,
+    forwardRef(() => ArtistsModule),
     HttpModule.registerAsync({
       useFactory: () => ({
         timeout: 5000,

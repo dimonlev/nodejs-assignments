@@ -1,11 +1,14 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Genre } from '../genres/entities/genre.entity';
+import { MemberExpression } from 'ts-morph';
+import { ArtistsService } from '../artists/artists.service';
 import { GenresService } from '../genres/genres.service';
 import { CreateBandInput } from './dto/create-band.input';
 import { UpdateBandInput } from './dto/update-band.input';
 import { Band } from './entities/band.entity';
+import { Member } from './entities/member.entity';
+import { BandResponse } from './types/bandResponse.type';
 import { BandsResponse } from './types/bandsResponse.type';
 
 @Injectable()
@@ -14,6 +17,8 @@ export class BandsService {
     private configService: ConfigService,
     private readonly httpService: HttpService,
     private readonly genresService: GenresService,
+    @Inject(forwardRef(() => ArtistsService))
+    private readonly artistsService: ArtistsService,
   ) {}
 
   async create(band: CreateBandInput, token: string): Promise<Band> {
@@ -23,11 +28,14 @@ export class BandsService {
         band,
         { headers: { Authorization: `${token}` } },
       );
-      if (data.genresIds) {
-        const genres = await this.getGenres(data.genresIds);
-        return { ...data, id: data._id, genres: genres };
-      }
-      return { ...data, id: data._id };
+      const genres = await this.getGenres(data.genresIds);
+      const members = await this.getMembers(data);
+      return {
+        ...data,
+        id: data._id,
+        genres: genres,
+        members: [...members],
+      };
     } catch (err) {
       console.log(err);
     }
@@ -38,11 +46,8 @@ export class BandsService {
       const { data } = await this.httpService.axiosRef.get<BandResponse>(
         `${this.configService.get<string>('BANDS_URL')}/${id}`,
       );
-      if (data.genresIds) {
-        const genres = await this.getGenres(data.genresIds);
-        return { ...data, id: data._id, genres: genres };
-      }
-      return { ...data, id: data._id };
+      const genres = await this.getGenres(data.genresIds);
+      return { ...data, id: data._id, genres: genres };
     } catch (err) {
       console.log(err);
     }
@@ -77,14 +82,35 @@ export class BandsService {
         band,
         { headers: { Authorization: `${token}` } },
       );
-      if (data.genresIds) {
-        const genres = await this.getGenres(data.genresIds);
-        return { ...data, id: data._id, genres: genres };
-      }
-      return { ...data, id: data._id };
+      const genres = await this.getGenres(data.genresIds);
+      const members = await this.getMembers(data);
+      return {
+        ...data,
+        id: data._id,
+        genres: genres,
+        members: [...members],
+      };
     } catch (err) {
       console.log(err);
     }
+  }
+
+  private async getMembers(band: BandResponse): Promise<Member[]> {
+    const { members } = band;
+    return (
+      await Promise.all(
+        members.map(async (member) => {
+          return this.artistsService.findOne(member.id);
+        }),
+      )
+    ).map((artist, index) => ({
+      id: artist.id,
+      firstName: artist.firstName,
+      secondName: artist.secondName,
+      middleName: artist.middleName,
+      instrument: artist.instruments[0],
+      years: members[index].years,
+    }));
   }
 
   async remove(id: string, token: string) {

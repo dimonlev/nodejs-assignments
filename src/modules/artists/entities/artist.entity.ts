@@ -9,5 +9,5 @@ export class Artist {
   birthPlace?: string;
   country: string;
   bands?: Band[];
-  instruments?: string;
+  instruments?: string[];
 }

@@ -1,7 +1,9 @@
+import { Member } from '../entities/member.entity';
+
 export class CreateBandInput {
   name: string;
   origin: string;
-  membersId: string[];
+  members: { id: string; years: string[] }[];
   website: string;
   genresIds: string[];
 }

@@ -4,10 +4,11 @@ import { ArtistsResolver } from './artists.resolver';
 import { HttpModule } from '@nestjs/axios';
 import { Axios } from 'axios';
 import { BandsModule } from '../bands/bands.module';
+import { forwardRef } from '@nestjs/common';
 
 @Module({
   imports: [
-    BandsModule,
+    forwardRef(() => BandsModule),
     HttpModule.registerAsync({
       useFactory: () => ({
         timeout: 5000,
@@ -16,5 +17,6 @@ import { BandsModule } from '../bands/bands.module';
     }),
   ],
   providers: [ArtistsResolver, ArtistsService, Axios],
+  exports: [ArtistsService],
 })
 export class ArtistsModule {}

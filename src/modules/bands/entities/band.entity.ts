@@ -1,10 +1,11 @@
 import { Genre } from 'src/modules/genres/entities/genre.entity';
+import { Member } from './member.entity';
 
 export class Band {
   id: string;
   name: string;
   origin: string;
-  // membersId: Member[];
+  members: Member[];
   website: string;
-  genres?: Genre[];
+  genres: Genre[];
 }

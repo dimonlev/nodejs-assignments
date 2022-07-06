@@ -7,7 +7,7 @@ type Artist {
   birthPlace: String
   country: String!
   bands: [Band]
-  instruments: String
+  instruments: [String]
 }
 
 input CreateArtistInput {
@@ -18,7 +18,7 @@ input CreateArtistInput {
   birthPlace: String
   country: String!
   bandsIds: [String]
-  instruments: String
+  instruments: [String]
 }
 
 input UpdateArtistInput {
@@ -30,7 +30,7 @@ input UpdateArtistInput {
   birthPlace: String
   country: String
   bandsIds: [String]
-  instruments: String
+  instruments: [String]
 }
 
 type Query {
