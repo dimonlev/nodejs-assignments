@@ -1,0 +1,28 @@
+type Favourite {
+  id: ID!
+  userId: ID
+  bands: [Band]
+  genres: [Genre]
+  artists: [Artist]
+  tracks: [Track]
+}
+
+input CreateFavouriteInput {
+  # Example field (placeholder)
+  exampleField: Int
+}
+
+input UpdateFavouriteInput {
+  id: Int!
+}
+
+type Query {
+  favourites: [Favourite]!
+  favourite(id: ID!): Favourite
+}
+
+type Mutation {
+  createFavourite(createFavouriteInput: CreateFavouriteInput!): Favourite!
+  updateFavourite(updateFavouriteInput: UpdateFavouriteInput!): Favourite!
+  removeFavourite(id: ID!): Favourite
+}

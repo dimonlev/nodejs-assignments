@@ -1,6 +1,6 @@
 export class CreateGenreInput {
   name: string;
-  description: string;
-  country: string;
-  year: number;
+  description?: string;
+  country?: string;
+  year?: number;
 }

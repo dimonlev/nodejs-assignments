@@ -7,7 +7,7 @@ type Genre {
 }
 
 input CreateGenreInput {
-  name: String
+  name: String!
   description: String
   country: String
   year: Int
