@@ -1,6 +1,8 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { CONTEXT } from '@nestjs/graphql';
+import { IncomingMessage } from 'http';
 import { CreateTrackInput } from './dto/create-track.input';
 import { UpdateTrackInput } from './dto/update-track.input';
 import { Track } from './entities/track.entity';
@@ -9,20 +11,27 @@ import { TracksResponse } from './types/tracksResponse.interface';
 
 @Injectable()
 export class TracksService {
+  private baseUrl: string;
   constructor(
-    private configService: ConfigService,
+    @Inject(CONTEXT) { req: request }: { req: IncomingMessage },
+    private readonly configService: ConfigService,
     private readonly httpService: HttpService,
-  ) {}
+  ) {
+    this.httpService.axiosRef.interceptors.request.use((req) => {
+      const receivedAuth = request.headers?.authorization;
+      if (!req.headers.authorization && receivedAuth) {
+        req.headers.authorization = receivedAuth;
+      }
+      return req;
+    });
+    this.baseUrl = this.configService.get<string>('TRACKS_URL');
+  }
 
-  async create(
-    createTrackInput: CreateTrackInput,
-    token: string,
-  ): Promise<Track> {
+  async create(createTrackInput: CreateTrackInput): Promise<Track> {
     try {
       const { data } = await this.httpService.axiosRef.post<TrackResponse>(
-        `${this.configService.get<string>('TRACKS_URL')}`,
+        this.baseUrl,
         createTrackInput,
-        { headers: { Authorization: `${token}` } },
       );
       return {
         ...data,
@@ -36,15 +45,11 @@ export class TracksService {
   async findAll(limit: string, offset: string): Promise<Track[]> {
     try {
       const { data } = await this.httpService.axiosRef.get<TracksResponse>(
-        `${this.configService.get<string>(
-          'TRACKS_URL',
-        )}?limit=${limit}&offset=${offset}`,
+        `${this.baseUrl}?limit=${limit}&offset=${offset}`,
       );
-      return await Promise.all(
-        data.items.map(async (artist) => {
-          return { ...artist, id: artist._id };
-        }),
-      );
+      return await data.items.map((artist) => {
+        return { ...artist, id: artist._id };
+      });
     } catch (err) {
       console.error(err);
     }
@@ -53,7 +58,7 @@ export class TracksService {
   async findOne(id: string): Promise<Track> {
     try {
       const { data } = await this.httpService.axiosRef.get<TrackResponse>(
-        `${this.configService.get<string>('TRACKS_URL')}/${id}`,
+        `${this.baseUrl}/${id}`,
       );
       return { ...data, id: data._id };
     } catch (err) {
@@ -61,16 +66,11 @@ export class TracksService {
     }
   }
 
-  async update(
-    id: string,
-    updateTrackInput: UpdateTrackInput,
-    token: string,
-  ): Promise<Track> {
+  async update(id: string, updateTrackInput: UpdateTrackInput): Promise<Track> {
     try {
       const { data } = await this.httpService.axiosRef.put<TrackResponse>(
-        `${this.configService.get<string>('TRACKS_URL')}/${id}`,
+        `${this.baseUrl}/${id}`,
         updateTrackInput,
-        { headers: { Authorization: `${token}` } },
       );
       return { ...data, id: data._id };
     } catch (err) {
@@ -78,12 +78,9 @@ export class TracksService {
     }
   }
 
-  async remove(id: string, token: string) {
+  async remove(id: string) {
     try {
-      await this.httpService.axiosRef.delete<Track>(
-        `${this.configService.get<string>('TRACKS_URL')}/${id}`,
-        { headers: { Authorization: `${token}` } },
-      );
+      await this.httpService.axiosRef.delete<Track>(`${this.baseUrl}/${id}`);
       return true;
     } catch (err) {
       console.error(err);

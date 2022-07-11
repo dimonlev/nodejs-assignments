@@ -4,8 +4,6 @@ import {
   Query,
   Mutation,
   Args,
-  Context,
-  Info,
   ResolveField,
   Parent,
 } from '@nestjs/graphql';
@@ -28,10 +26,8 @@ export class ArtistsResolver {
   @Mutation('createArtist')
   create(
     @Args('createArtistInput') createArtistInput: CreateArtistInput,
-    @Context() context,
   ): Promise<Artist> {
-    const token = context.req.headers.authorization;
-    return this.artistsService.create(createArtistInput, token);
+    return this.artistsService.create(createArtistInput);
   }
 
   @Query('artists')
@@ -58,19 +54,12 @@ export class ArtistsResolver {
   @Mutation('updateArtist')
   update(
     @Args('updateArtistInput') updateArtistInput: UpdateArtistInput,
-    @Context() context,
   ): Promise<Artist> {
-    const token = context.req.headers.authorization;
-    return this.artistsService.update(
-      updateArtistInput.id,
-      updateArtistInput,
-      token,
-    );
+    return this.artistsService.update(updateArtistInput.id, updateArtistInput);
   }
 
   @Mutation('removeArtist')
-  remove(@Args('id') id: number, @Context() context): Promise<Boolean> {
-    const token = context.req.headers.authorization;
-    return this.artistsService.remove(id, token);
+  remove(@Args('id') id: string): Promise<Boolean> {
+    return this.artistsService.remove(id);
   }
 }

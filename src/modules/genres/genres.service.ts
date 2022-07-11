@@ -1,6 +1,8 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { CONTEXT } from '@nestjs/graphql';
+import { IncomingMessage } from 'http';
 import { CreateGenreInput } from './dto/create-genre.input';
 import { UpdateGenreInput } from './dto/update-genre.input';
 import { Genre } from './entities/genre.entity';
@@ -9,20 +11,27 @@ import { GenresResponse } from './types/genresResponse.interface';
 
 @Injectable()
 export class GenresService {
+  private baseUrl: string;
   constructor(
+    @Inject(CONTEXT) { req: request }: { req: IncomingMessage },
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
-  ) {}
+  ) {
+    this.httpService.axiosRef.interceptors.request.use((req) => {
+      const receivedAuth = request.headers?.authorization;
+      if (!req.headers.authorization && receivedAuth) {
+        req.headers.authorization = receivedAuth;
+      }
+      return req;
+    });
+    this.baseUrl = this.configService.get<string>('GENRES_URL');
+  }
 
-  async create(
-    createGenreInput: CreateGenreInput,
-    token: string,
-  ): Promise<Genre> {
+  async create(createGenreInput: CreateGenreInput): Promise<Genre> {
     try {
       const { data } = await this.httpService.axiosRef.post<GenreResponse>(
-        `${this.configService.get<string>('GENRES_URL')}`,
+        this.baseUrl,
         createGenreInput,
-        { headers: { Authorization: `${token}` } },
       );
       return { ...data, id: data._id };
     } catch (err) {
@@ -33,9 +42,7 @@ export class GenresService {
   async findAll(limit: string, offset: string): Promise<Genre[]> {
     try {
       const { data } = await this.httpService.axiosRef.get<GenresResponse>(
-        `${this.configService.get<string>(
-          'GENRES_URL',
-        )}?limit=${limit}&offset=${offset}`,
+        `${this.baseUrl}?limit=${limit}&offset=${offset}`,
       );
       return data.items.map((genres) => {
         return { ...genres, id: genres._id };
@@ -48,7 +55,7 @@ export class GenresService {
   async findOne(id: string): Promise<Genre> {
     try {
       const { data } = await this.httpService.axiosRef.get<GenreResponse>(
-        `${this.configService.get<string>('GENRES_URL')}/${id}`,
+        `${this.baseUrl}/${id}`,
       );
       return { ...data, id: data._id };
     } catch (err) {
@@ -56,12 +63,11 @@ export class GenresService {
     }
   }
 
-  async update(id: string, updateGenreInput: UpdateGenreInput, token: string) {
+  async update(id: string, updateGenreInput: UpdateGenreInput) {
     try {
       const { data } = await this.httpService.axiosRef.put<GenreResponse>(
-        `${this.configService.get<string>('GENRES_URL')}/${id}`,
+        `${this.baseUrl}/${id}`,
         updateGenreInput,
-        { headers: { Authorization: `${token}` } },
       );
       return { ...data, id: data._id };
     } catch (err) {
@@ -69,12 +75,9 @@ export class GenresService {
     }
   }
 
-  async remove(id: string, token: string) {
+  async remove(id: string) {
     try {
-      await this.httpService.axiosRef.delete<Genre>(
-        `${this.configService.get<string>('GENRES_URL')}/${id}`,
-        { headers: { Authorization: `${token}` } },
-      );
+      await this.httpService.axiosRef.delete<Genre>(`${this.baseUrl}/${id}`);
       return true;
     } catch (err) {
       console.error(err);

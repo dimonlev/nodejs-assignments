@@ -36,10 +36,8 @@ export class TracksResolver {
   @Mutation('createTrack')
   create(
     @Args('createTrackInput') createTrackInput: CreateTrackInput,
-    @Context() context,
   ): Promise<Track> {
-    const token = context.req.headers.authorization;
-    return this.tracksService.create(createTrackInput, token);
+    return this.tracksService.create(createTrackInput);
   }
 
   @ResolveField()
@@ -88,19 +86,12 @@ export class TracksResolver {
   @Mutation('updateTrack')
   update(
     @Args('updateTrackInput') updateTrackInput: UpdateTrackInput,
-    @Context() context,
   ): Promise<Track> {
-    const token = context.req.headers.authorization;
-    return this.tracksService.update(
-      updateTrackInput.id,
-      updateTrackInput,
-      token,
-    );
+    return this.tracksService.update(updateTrackInput.id, updateTrackInput);
   }
 
   @Mutation('removeTrack')
-  remove(@Args('id') id: string, @Context() context): Promise<Boolean> {
-    const token = context.req.headers.authorization;
-    return this.tracksService.remove(id, token);
+  remove(@Args('id') id: string): Promise<Boolean> {
+    return this.tracksService.remove(id);
   }
 }

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './entities/user.entity';
 import { HttpService } from '@nestjs/axios';
 import { UserRequest } from './types/userRequestToken.entity';
@@ -10,15 +9,18 @@ import { UserResponse } from './entities/userResponse.entity';
 
 @Injectable()
 export class UsersService {
+  private readonly baseUrl: string;
   constructor(
     private configService: ConfigService,
     private readonly httpService: HttpService,
-  ) {}
+  ) {
+    this.baseUrl = this.configService.get<string>('USERS_URL');
+  }
 
   async create(createUserInput: CreateUserInput): Promise<User> {
     try {
       const { data } = await this.httpService.axiosRef.post<UserResponse>(
-        `${this.configService.get<string>('USERS_URL')}/register`,
+        `${this.baseUrl}/register`,
         createUserInput,
       );
       return { ...data, id: data._id };
@@ -30,7 +32,7 @@ export class UsersService {
   async findOne(id: string) {
     try {
       const { data } = await this.httpService.axiosRef.get<User>(
-        `${this.configService.get<string>('USERS_URL')}/${id}`,
+        `${this.baseUrl}/${id}`,
       );
       return data;
     } catch (err) {
@@ -41,7 +43,7 @@ export class UsersService {
   async getToken(userRequest: UserRequest) {
     try {
       const { data } = await this.httpService.axiosRef.post<Jwt>(
-        `${this.configService.get<string>('USERS_URL')}/login`,
+        `${this.baseUrl}/login`,
         userRequest,
       );
       return data;

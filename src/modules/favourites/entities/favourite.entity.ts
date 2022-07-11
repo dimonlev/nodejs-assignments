@@ -1,4 +1,4 @@
-export class Favorite {
+export class Favourite {
   id: string;
   userId?: string;
   bandsIds?: string[];

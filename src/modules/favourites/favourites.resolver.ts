@@ -1,34 +1,82 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { FavouritesService } from './favourites.service';
-import { CreateFavouriteInput } from './dto/create-favourite.input';
-import { UpdateFavouriteInput } from './dto/update-favourite.input';
+import { FavouriteInput } from './dto/favourite.input';
+import { TracksService } from '../tracks/tracks.service';
+import { BandsService } from '../bands/bands.service';
+import { ArtistsService } from '../artists/artists.service';
+import { GenresService } from '../genres/genres.service';
+import { Artist } from '../artists/entities/artist.entity';
+import { Band } from '../bands/entities/band.entity';
+import { Track } from '../tracks/entities/track.entity';
+import { Genre } from '../genres/entities/genre.entity';
+import { FavouriteResponse } from './types/favouriteResponse.interface';
+import { Favourite } from './entities/favourite.entity';
 
 @Resolver('Favourite')
 export class FavouritesResolver {
-  constructor(private readonly favouritesService: FavouritesService) {}
+  constructor(
+    private readonly favouritesService: FavouritesService,
+    private readonly tracksService: TracksService,
+    private readonly bandsService: BandsService,
+    private readonly artistsService: ArtistsService,
+    private readonly genresService: GenresService,
+  ) {}
 
-  @Mutation('createFavourite')
-  create(@Args('createFavouriteInput') createFavouriteInput: CreateFavouriteInput) {
-    return this.favouritesService.create(createFavouriteInput);
+  @Mutation('addToFavourite')
+  create(
+    @Args('favouriteInput') favouriteInput: FavouriteInput,
+  ): Promise<Favourite> {
+    return this.favouritesService.create(favouriteInput);
   }
 
   @Query('favourites')
-  findAll() {
-    return this.favouritesService.findAll();
+  async findAll(): Promise<Favourite> {
+    return await this.favouritesService.getAllFavourite();
   }
 
-  @Query('favourite')
-  findOne(@Args('id') id: number) {
-    return this.favouritesService.findOne(id);
+  @Mutation('removeFromFavourite')
+  remove(
+    @Args('favouriteInput') favouriteInput: FavouriteInput,
+  ): Promise<Favourite> {
+    return this.favouritesService.remove(favouriteInput);
   }
 
-  @Mutation('updateFavourite')
-  update(@Args('updateFavouriteInput') updateFavouriteInput: UpdateFavouriteInput) {
-    return this.favouritesService.update(updateFavouriteInput.id, updateFavouriteInput);
+  @ResolveField()
+  async artists(@Parent() favourite: FavouriteResponse): Promise<Artist[]> {
+    const { artistsIds } = favourite;
+    return (await artistsIds)
+      ? Promise.all(artistsIds.map((id) => this.artistsService.findOne(id)))
+      : null;
   }
 
-  @Mutation('removeFavourite')
-  remove(@Args('id') id: number) {
-    return this.favouritesService.remove(id);
+  @ResolveField()
+  async bands(@Parent() favourite: FavouriteResponse): Promise<Band[]> {
+    const { bandsIds } = favourite;
+    return (await bandsIds)
+      ? Promise.all(bandsIds.map((id) => this.bandsService.findOne(id)))
+      : null;
+  }
+
+  @ResolveField()
+  async tracks(@Parent() favourite: FavouriteResponse): Promise<Track[]> {
+    const { tracksIds } = favourite;
+    return (await tracksIds)
+      ? Promise.all(tracksIds.map((id) => this.tracksService.findOne(id)))
+      : null;
+  }
+
+  @ResolveField()
+  async genres(@Parent() favourite: FavouriteResponse): Promise<Genre[]> {
+    const { genresIds } = favourite;
+    return (await genresIds)
+      ? Promise.all(genresIds.map((id) => this.genresService.findOne(id)))
+      : null;
   }
 }

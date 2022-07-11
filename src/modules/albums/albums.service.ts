@@ -1,6 +1,8 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { CONTEXT } from '@nestjs/graphql';
+import { IncomingMessage } from 'http';
 import { CreateAlbumInput } from './dto/create-album.input';
 import { UpdateAlbumInput } from './dto/update-album.input';
 import { Album } from './entities/album.entity';
@@ -9,20 +11,27 @@ import { AlbumsResponse } from './types/albumsResponse.interface';
 
 @Injectable()
 export class AlbumsService {
+  private baseUrl: string;
   constructor(
+    @Inject(CONTEXT) { req: request }: { req: IncomingMessage },
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
-  ) {}
+  ) {
+    this.httpService.axiosRef.interceptors.request.use((req) => {
+      const receivedAuth = request.headers?.authorization;
+      if (!req.headers.authorization && receivedAuth) {
+        req.headers.authorization = receivedAuth;
+      }
+      return req;
+    });
+    this.baseUrl = this.configService.get<string>('ALBUMS_URL');
+  }
 
-  async create(
-    createAlbumInput: CreateAlbumInput,
-    token: string,
-  ): Promise<Album> {
+  async create(createAlbumInput: CreateAlbumInput): Promise<Album> {
     try {
       const { data } = await this.httpService.axiosRef.post<AlbumResponse>(
-        `${this.configService.get<string>('ALBUMS_URL')}`,
+        this.baseUrl,
         createAlbumInput,
-        { headers: { Authorization: `${token}` } },
       );
       return { ...data, id: data._id };
     } catch (err) {
@@ -33,15 +42,11 @@ export class AlbumsService {
   async findAll(limit: string, offset: string): Promise<Album[]> {
     try {
       const { data } = await this.httpService.axiosRef.get<AlbumsResponse>(
-        `${this.configService.get<string>(
-          'ALBUMS_URL',
-        )}?limit=${limit}&offset=${offset}`,
+        `${this.baseUrl}?limit=${limit}&offset=${offset}`,
       );
-      return await Promise.all(
-        data.items.map(async (artist) => {
-          return { ...artist, id: artist._id };
-        }),
-      );
+      return data.items.map((artist) => {
+        return { ...artist, id: artist._id };
+      });
     } catch (err) {
       console.error(err);
     }
@@ -50,7 +55,7 @@ export class AlbumsService {
   async findOne(id: string): Promise<Album> {
     try {
       const { data } = await this.httpService.axiosRef.get<AlbumResponse>(
-        `${this.configService.get<string>('ALBUMS_URL')}/${id}`,
+        `${this.baseUrl}/${id}`,
       );
       return { ...data, id: data._id };
     } catch (err) {
@@ -58,16 +63,11 @@ export class AlbumsService {
     }
   }
 
-  async update(
-    id: string,
-    updateAlbumInput: UpdateAlbumInput,
-    token: string,
-  ): Promise<Album> {
+  async update(id: string, updateAlbumInput: UpdateAlbumInput): Promise<Album> {
     try {
       const { data } = await this.httpService.axiosRef.put<AlbumResponse>(
-        `${this.configService.get<string>('ALBUMS_URL')}/${id}`,
+        `${this.baseUrl}/${id}`,
         updateAlbumInput,
-        { headers: { Authorization: `${token}` } },
       );
       return { ...data, id: data._id };
     } catch (err) {
@@ -75,12 +75,9 @@ export class AlbumsService {
     }
   }
 
-  async remove(id: string, token: string) {
+  async remove(id: string) {
     try {
-      await this.httpService.axiosRef.delete<Album>(
-        `${this.configService.get<string>('ALBUMS_URL')}/${id}`,
-        { headers: { Authorization: `${token}` } },
-      );
+      await this.httpService.axiosRef.delete<Album>(`${this.baseUrl}/${id}`);
       return true;
     } catch (err) {
       console.error(err);

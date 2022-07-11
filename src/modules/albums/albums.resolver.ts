@@ -36,10 +36,8 @@ export class AlbumsResolver {
   @Mutation('createAlbum')
   create(
     @Args('createAlbumInput') createAlbumInput: CreateAlbumInput,
-    @Context() context,
   ): Promise<Album> {
-    const token = context.req.headers.authorization;
-    return this.albumsService.create(createAlbumInput, token);
+    return this.albumsService.create(createAlbumInput);
   }
 
   @ResolveField()
@@ -89,19 +87,12 @@ export class AlbumsResolver {
   @Mutation('updateAlbum')
   update(
     @Args('updateAlbumInput') updateAlbumInput: UpdateAlbumInput,
-    @Context() context,
   ): Promise<Album> {
-    const token = context.req.headers.authorization;
-    return this.albumsService.update(
-      updateAlbumInput.id,
-      updateAlbumInput,
-      token,
-    );
+    return this.albumsService.update(updateAlbumInput.id, updateAlbumInput);
   }
 
   @Mutation('removeAlbum')
-  remove(@Args('id') id: string, @Context() context): Promise<Boolean> {
-    const token = context.req.headers.authorization;
-    return this.albumsService.remove(id, token);
+  remove(@Args('id') id: string): Promise<Boolean> {
+    return this.albumsService.remove(id);
   }
 }

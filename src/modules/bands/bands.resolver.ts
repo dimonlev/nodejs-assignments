@@ -4,7 +4,6 @@ import {
   Query,
   Mutation,
   Args,
-  Context,
   ResolveField,
   Parent,
 } from '@nestjs/graphql';
@@ -30,10 +29,8 @@ export class BandsResolver {
   @Mutation('createBand')
   create(
     @Args('createBandInput') createBandInput: CreateBandInput,
-    @Context() context,
   ): Promise<Band> {
-    const token = context.req.headers.authorization;
-    return this.bandsService.create(createBandInput, token);
+    return this.bandsService.create(createBandInput);
   }
 
   @Query('bands')
@@ -77,17 +74,12 @@ export class BandsResolver {
   }
 
   @Mutation('updateBand')
-  update(
-    @Args('updateBandInput') updateBandInput: UpdateBandInput,
-    @Context() context,
-  ) {
-    const token = context.req.headers.authorization;
-    return this.bandsService.update(updateBandInput.id, updateBandInput, token);
+  update(@Args('updateBandInput') updateBandInput: UpdateBandInput) {
+    return this.bandsService.update(updateBandInput.id, updateBandInput);
   }
 
   @Mutation('removeBand')
-  remove(@Args('id') id: string, @Context() context) {
-    const token = context.req.headers.authorization;
-    return this.bandsService.remove(id, token);
+  remove(@Args('id') id: string) {
+    return this.bandsService.remove(id);
   }
 }

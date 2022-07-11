@@ -31,7 +31,6 @@ input CreateUserInput {
 }
 
 type Query {
-  users: [User]!
   user(id: ID!): User
   jwt(user: UserRequest): Jwt
 }
