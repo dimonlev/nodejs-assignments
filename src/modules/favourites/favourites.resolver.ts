@@ -51,7 +51,7 @@ export class FavouritesResolver {
   @ResolveField()
   async artists(@Parent() favourite: FavouriteResponse): Promise<Artist[]> {
     const { artistsIds } = favourite;
-    return (await artistsIds)
+    return artistsIds
       ? Promise.all(artistsIds.map((id) => this.artistsService.findOne(id)))
       : null;
   }
@@ -59,7 +59,7 @@ export class FavouritesResolver {
   @ResolveField()
   async bands(@Parent() favourite: FavouriteResponse): Promise<Band[]> {
     const { bandsIds } = favourite;
-    return (await bandsIds)
+    return bandsIds
       ? Promise.all(bandsIds.map((id) => this.bandsService.findOne(id)))
       : null;
   }
@@ -67,7 +67,7 @@ export class FavouritesResolver {
   @ResolveField()
   async tracks(@Parent() favourite: FavouriteResponse): Promise<Track[]> {
     const { tracksIds } = favourite;
-    return (await tracksIds)
+    return tracksIds
       ? Promise.all(tracksIds.map((id) => this.tracksService.findOne(id)))
       : null;
   }
@@ -75,7 +75,7 @@ export class FavouritesResolver {
   @ResolveField()
   async genres(@Parent() favourite: FavouriteResponse): Promise<Genre[]> {
     const { genresIds } = favourite;
-    return (await genresIds)
+    return genresIds
       ? Promise.all(genresIds.map((id) => this.genresService.findOne(id)))
       : null;
   }

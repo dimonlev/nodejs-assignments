@@ -31,10 +31,10 @@ export class UsersService {
 
   async findOne(id: string) {
     try {
-      const { data } = await this.httpService.axiosRef.get<User>(
+      const { data } = await this.httpService.axiosRef.get<UserResponse>(
         `${this.baseUrl}/${id}`,
       );
-      return data;
+      return { ...data, id: data._id };
     } catch (err) {
       console.log(err);
     }
